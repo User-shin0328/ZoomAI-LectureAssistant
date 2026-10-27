@@ -92,7 +92,6 @@ class LectureAssistant:
         self.llm_engine = LLMEngine(
             base_url=config.OLLAMA_BASE_URL,
             model=config.OLLAMA_MODEL,
-            fallback_models=config.OLLAMA_FALLBACK_MODELS,
             timeout=config.OLLAMA_TIMEOUT,
         )
 

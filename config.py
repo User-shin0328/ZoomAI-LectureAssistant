@@ -23,8 +23,7 @@ WHISPER_VAD_FILTER = True      # 무음 구간 자동 감지 및 제거
 
 # --- LLM (Ollama) 설정 ---
 OLLAMA_BASE_URL = "http://localhost:11434"
-OLLAMA_MODEL = "qwen2.5:7b"     # 황금 밸런스 추천 모델
-OLLAMA_FALLBACK_MODELS = ["qwen3.5:4b", "exaone-3.5:latest", "qwen2.5:3b", "qwen2.5-coder:7b"]
+OLLAMA_MODEL = "qwen2.5:7b"     # 기본 모델
 OLLAMA_TIMEOUT = 240           # CPU 추론 여유를 위해 타임아웃 240초(4분)로 확대
 
 # --- 저장 경로 설정 ---

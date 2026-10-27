@@ -36,7 +36,7 @@ class LLMEngine:
     ):
         self.base_url = base_url.rstrip("/")
         self.model = model
-        self.fallback_models = fallback_models or ["qwen2.5:3b", "qwen3:4b"]
+        self.fallback_models = fallback_models or []
         self.timeout = timeout
         self.active_model = model
 
@@ -61,13 +61,7 @@ class LLMEngine:
                     self.active_model = matching[0]
                     return True
 
-                # 2. 대체 모델(Fallback) 검색
-                for fb in self.fallback_models:
-                    fb_matching = [m for m in available_models if fb in m]
-                    if fb_matching:
-                        self.active_model = fb_matching[0]
-                        return True
-
+                # 2. 설치된 모델이 있으면 첫 번째 설치 모델 사용
                 if available_models:
                     self.active_model = available_models[0]
                     return True
@@ -152,19 +146,6 @@ class LLMEngine:
             data = response.json()
             return data.get("response", "").strip()
         except requests.exceptions.Timeout:
-            # 7B 모델 연산이 CPU에서 지정된 시간을 초과한 경우: 고속 경량 모델(4B/3B)로 즉시 1회 자동 재시도
-            print(f"\n[Ollama 알림] '{self.active_model}' 연산 시간 초과. 고속 경량 모델로 자동 재시도합니다...")
-            for alt in self.fallback_models:
-                try:
-                    alt_payload = dict(payload)
-                    alt_payload["model"] = alt
-                    alt_payload["options"]["num_predict"] = 350
-                    res = requests.post(endpoint, json=alt_payload, timeout=90)
-                    if res.status_code == 200:
-                        print(f"[Ollama 재시도 성공] 대체 모델 '{alt}'로 요약 완료.")
-                        return res.json().get("response", "").strip()
-                except Exception:
-                    continue
             raise RuntimeError(f"Ollama 호출 시간 초과 (타임아웃 {self.timeout}초 경과)")
         except requests.exceptions.RequestException as e:
             raise RuntimeError(f"Ollama 호출 실패 ({self.active_model}): {e}")
