@@ -131,7 +131,7 @@ class LLMEngine:
 
         return False
 
-    def _call_ollama(self, prompt: str, system_prompt: str) -> str:
+    def _call_ollama(self, prompt: str, system_prompt: str, max_tokens: int = 450) -> str:
         """Ollama /api/generate 엔드포인트를 호출합니다."""
         endpoint = f"{self.base_url}/api/generate"
         payload = {
@@ -140,8 +140,9 @@ class LLMEngine:
             "system": system_prompt,
             "stream": False,
             "options": {
-                "temperature": 0.3,  # 사실 기반 요약을 위해 낮은 온도 설정
-                "num_ctx": 4096,     # 컨텍스트 창 크기
+                "temperature": 0.3,
+                "num_ctx": 2048,           # CPU 컨텍스트 로딩 속도 최적화
+                "num_predict": max_tokens, # 토큰 생성 상한 제한 (연산 시간 절반 단축)
             },
         }
 
@@ -150,6 +151,21 @@ class LLMEngine:
             response.raise_for_status()
             data = response.json()
             return data.get("response", "").strip()
+        except requests.exceptions.Timeout:
+            # 7B 모델 연산이 CPU에서 지정된 시간을 초과한 경우: 고속 경량 모델(4B/3B)로 즉시 1회 자동 재시도
+            print(f"\n[Ollama 알림] '{self.active_model}' 연산 시간 초과. 고속 경량 모델로 자동 재시도합니다...")
+            for alt in self.fallback_models:
+                try:
+                    alt_payload = dict(payload)
+                    alt_payload["model"] = alt
+                    alt_payload["options"]["num_predict"] = 350
+                    res = requests.post(endpoint, json=alt_payload, timeout=90)
+                    if res.status_code == 200:
+                        print(f"[Ollama 재시도 성공] 대체 모델 '{alt}'로 요약 완료.")
+                        return res.json().get("response", "").strip()
+                except Exception:
+                    continue
+            raise RuntimeError(f"Ollama 호출 시간 초과 (타임아웃 {self.timeout}초 경과)")
         except requests.exceptions.RequestException as e:
             raise RuntimeError(f"Ollama 호출 실패 ({self.active_model}): {e}")
 
@@ -182,7 +198,7 @@ class LLMEngine:
 #### 💡 중요 키워드 & 용어
 - **키워드**: 간단한 정의 및 맥락 설명
 """
-        return self._call_ollama(user_prompt, system_prompt)
+        return self._call_ollama(user_prompt, system_prompt, max_tokens=450)
 
     def generate_final_report(self, full_transcript: str) -> str:
         """
@@ -211,4 +227,4 @@ class LLMEngine:
 ## 2. 강의 세부 내용 정리
 (강의 흐름에 따라 진행된 주요 개념, 설명, 예시를 소주제별로 빠짐없이 구조화하여 상세히 정리)
 """
-        return self._call_ollama(user_prompt, system_prompt)
+        return self._call_ollama(user_prompt, system_prompt, max_tokens=1500)

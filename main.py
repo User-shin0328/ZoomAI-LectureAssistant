@@ -141,7 +141,10 @@ class LectureAssistant:
             print(f"{Fore.WHITE}{summary_result}\n", flush=True)
             self.write_summary_entry(summary_result)
         except Exception as e:
-            print(f"{Fore.RED}[요약 오류 발생] {e}{Style.RESET_ALL}", flush=True)
+            print(f"\n{Fore.RED}[요약 오류 발생] {e}{Style.RESET_ALL}", flush=True)
+            # 요약에 실패하더라도 원문 내용이 유실되지 않도록 파일에 보존 기록
+            fallback_note = f"### [{status_label}] 구간 기록\n> *(AI 응답 지연으로 요약 생략 - 원문 보존)*\n\n{chunk_text}"
+            self.write_summary_entry(fallback_note)
 
     def trigger_periodic_summary(self, is_final: bool = False):
         """누적된 전사 텍스트를 바탕으로 3분 단위 요약을 실행합니다."""
