@@ -1,0 +1,28 @@
+# Virtual environment
+.venv/
+env/
+venv/
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Build & temp folders
+dist_temp/
+build_dist/
+build_dist_test/
+
+# User lecture recordings & notes output (keep directory structure with .gitkeep)
+notes/*
+!notes/.gitkeep
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Large archives (keep releases lightweight)
+*.zip

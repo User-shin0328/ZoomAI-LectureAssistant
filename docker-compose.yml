@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  ollama-server:
+    image: ollama/ollama:latest
+    container_name: lecture-ai-ollama
+    restart: always
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    # NVIDIA GPU 가속을 컨테이너에 전달 (NVIDIA Container Toolkit 필요)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+volumes:
+  ollama_models:
+    name: lecture_ai_ollama_models
