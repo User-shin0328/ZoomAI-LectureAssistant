@@ -10,7 +10,7 @@ from pathlib import Path
 # --- 오디오 캡처 설정 ---
 TARGET_SAMPLE_RATE = 16000     # Whisper 표준 입력 샘플링 레이트 (16kHz)
 CHUNK_DURATION_SEC = 8         # 실시간 자막 전사 주기 (초 단위: 7~10초 권장)
-SUMMARY_INTERVAL_SEC = 180     # AI 구간 요약 주기 (초 단위: 180초 = 3분)
+SUMMARY_INTERVAL_SEC = 240     # AI 구간 요약 주기 (초 단위: 240초 = 4분, 문맥 완성도 향상)
 
 # --- STT (Faster-Whisper) 설정 ---
 # VRAM 6GB 보호를 위해 Whisper는 CPU INT8로 고속 추론
